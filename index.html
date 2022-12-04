@@ -41,6 +41,8 @@
             </tr>
         </tbody>
     </table>
+    <textarea name="board" id="board" cols="30" rows="10"></textarea>
+    <button id="cleanAndCopy" onclick="cleanAndCopy()">Clean & Copy</button>
 </body>
 <script type="text/javascript">
     
@@ -163,6 +165,21 @@ function calc() {
 function showOrHide() {
     const password = document.getElementById('password');
     password.type = password.type === 'password' ? 'text' : 'password';
+}
+
+function cleanAndCopy() {
+    const board = document.getElementById('board');
+    board.value = !!board.value ? board.value.replaceAll(/\s/g, '') : board.value
+    if (!board.value) {
+        alert('board is empty')
+        return
+    }
+    // copy
+    navigator.clipboard.writeText(board.value).then(() => {
+        alert("Text copied to clipboard...")
+    }).catch(err => {
+        alert('Something went wrong', err);
+    })
 }
 </script>
 </html>
