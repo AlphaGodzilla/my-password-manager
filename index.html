@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyPasswordManager</title>
+    <!-- <script src="https://cdn.bootcdn.net/ajax/libs/crypto-js/4.1.1/sha256.min.js"></script> -->
+    <!-- <script src="https://cdn.bootcdn.net/ajax/libs/crypto-js/4.1.1/core.js"></script> -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style type="text/css">
+        body {
+            font-family: monospace;
+            font-size: xx-large;
+        }
+
+        .box {
+            margin: 15px;
+        }
+    </style>
+</head>
+<body>
+    <input id="domain" type="text" title="domain" placeholder="doamin">
+    <input id="password" type="text" title="password" placeholder="password">
+    <!-- <input id="salt" type="text" title="salt" placeholder="salt"> -->
+    <button onclick="show()">Clac</button>
+    <table border="2px">
+        <thead>
+            <tr>
+                <th>Numbers</th>
+                <th>Letters</th>
+                <th>Symbols</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><p class="box" id="numbers"></p></td>
+                <td><p class="box" id="letters"></p></td>
+                <td><p class="box" id="symbols"></p></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+<script type="text/javascript">
+    
+function sha256(value_str) {
+    // const hash = crypto.createHash('sha256');
+    // hash.update(value_str);
+    // return hash.digest('hex');
+    return CryptoJS.SHA256(value_str).toString();
+}
+
+function numbers(domain, simplePassword, salt) {
+    const hash = sha256(domain + simplePassword + salt);
+    // console.log(hash);
+    const step = 2;
+    let start = 0;
+    let end = start + step;
+    const steps = Math.ceil(hash.length/step);
+    const numbers = [];
+    for(let i = 0; i < steps; i++) {
+        const seq = hash.slice(start, end);
+        // numbers.push(seq);
+        numbers.push(parseInt('0x' + seq) % 10)
+        start += step;
+        end = start + step;
+    }
+    // console.log(numbers);
+    return {
+        hash,
+        value: numbers, 
+    };
+}
+
+
+function letters(numbersHash) {
+    const hash = sha256(sha256(numbersHash));
+    // console.log(hash);
+    const letters = 'abcdefghijklnmopqrstuvwxyz' + 'ABCDEFGHIJKLNMOPQRSTUVWXYZ';
+    const step = 2;
+    let start = 0;
+    let end = start + step;
+    const steps = Math.ceil(hash.length/step);
+    const letters_seq = [];
+    for(let i = 0; i < steps; i++) {
+        const seq = hash.slice(start, end);
+        const letters_index = parseInt('0x' + seq) % letters.length;
+        letters_seq.push(letters[letters_index])
+        start += step;
+        end = start + step;
+    }
+    return {
+        hash,
+        value: letters_seq,
+    }
+}
+
+function symbols(lettersHash) {
+    const hash = sha256(sha256(sha256(lettersHash)))
+    // console.log(hash)
+    const symbols = '~!@#$%^&*()-_=+[{]}|;:,<.>/?'
+    const step = 2;
+    let start = 0;
+    let end = start + step;
+    const steps = Math.ceil(hash.length/step);
+    const symbols_seq = [];
+    for(let i = 0; i < steps; i++) {
+        const seq = hash.slice(start, end);
+        const symbol_index = parseInt('0x' + seq) % symbols.length;
+        symbols_seq.push(symbols[symbol_index])
+        start += step;
+        end = start + step;
+    }
+    return {
+        hash,
+        value: symbols_seq,
+    }
+}
+
+function printMatrix(row, colum, seq, fill) {
+    let r = ''
+    let index = 0
+    for(i=0; i<row; i++) {
+        for(j=0; j<colum; j++) {
+            let e = seq[index];
+            e = !e ? fill : e;
+            r += e
+            if (j < colum - 1) {
+                r += '      '
+            }
+            index++;
+        }
+        if (i < row - 1) {
+            r += '\n'
+        }
+    }
+    return r;
+}
+
+function show() {
+    const domain = document.getElementById('domain').value;
+    // console.log(domain)
+    const password = document.getElementById('password').value;
+    // console.log(password)
+    // const salt = document.getElementById('salt').value;
+    // console.log(salt)
+    if (!domain || !password) {
+        alert("please input domain or password or salt")
+        return;
+    }
+    const numbersEl = document.getElementById('numbers')
+    const lettersEl = document.getElementById('letters')
+    const symbolsEl = document.getElementById('symbols')
+    const numbersResult = numbers(domain, password, '');
+    const lettersResult = letters(numbersResult.hash);
+    const symbolsResult = symbols(lettersResult.hash);
+    numbersEl.innerText = printMatrix(4, 8, numbersResult.value, '0')
+    lettersEl.innerText = printMatrix(4, 8, lettersResult.value, 'a')
+    symbolsEl.innerText = printMatrix(4, 8, symbolsResult.value, '*')
+}
+</script>
+</html>
