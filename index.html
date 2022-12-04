@@ -21,9 +21,10 @@
 </head>
 <body>
     <input id="domain" type="text" title="domain" placeholder="doamin">
-    <input id="password" type="text" title="password" placeholder="password">
+    <input id="password" type="password" title="password" placeholder="password">
     <!-- <input id="salt" type="text" title="salt" placeholder="salt"> -->
-    <button onclick="show()">Clac</button>
+    <button onclick="showOrHide()">show/hide</button>
+    <button onclick="calc()">Clac</button>
     <table border="2px">
         <thead>
             <tr>
@@ -137,7 +138,7 @@ function printMatrix(row, colum, seq, fill) {
     return r;
 }
 
-function show() {
+function calc() {
     const domain = document.getElementById('domain').value;
     // console.log(domain)
     const password = document.getElementById('password').value;
@@ -157,6 +158,11 @@ function show() {
     numbersEl.innerText = printMatrix(4, 8, numbersResult.value, '0')
     lettersEl.innerText = printMatrix(4, 8, lettersResult.value, 'a')
     symbolsEl.innerText = printMatrix(4, 8, symbolsResult.value, '*')
+}
+
+function showOrHide() {
+    const password = document.getElementById('password');
+    password.type = password.type === 'password' ? 'text' : 'password';
 }
 </script>
 </html>
