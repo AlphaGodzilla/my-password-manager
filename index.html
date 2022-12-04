@@ -179,7 +179,7 @@ function cleanAndCopy() {
         alert("Text copied to clipboard...")
     }).catch(err => {
         alert('Something went wrong', err);
-    })
+    }).finally(() => board.value = '')
 }
 </script>
 </html>
